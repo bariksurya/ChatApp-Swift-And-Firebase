@@ -9,19 +9,19 @@
 /* Begin PBXBuildFile section */
 		D84927081F79E1660093C729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84927071F79E1660093C729 /* AppDelegate.swift */; };
 		D849270A1F79E1660093C729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84927091F79E1660093C729 /* ViewController.swift */; };
-		D849270D1F79E1660093C729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D849270B1F79E1660093C729 /* Main.storyboard */; };
 		D849270F1F79E1660093C729 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D849270E1F79E1660093C729 /* Assets.xcassets */; };
 		D84927121F79E1660093C729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D84927101F79E1660093C729 /* LaunchScreen.storyboard */; };
+		D8F3849C1F7B279F00E81727 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F3849B1F7B279E00E81727 /* LoginController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		D84927041F79E1660093C729 /* ChatApp-Swift-And-Firebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChatApp-Swift-And-Firebase.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D84927071F79E1660093C729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D84927091F79E1660093C729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		D849270C1F79E1660093C729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D849270E1F79E1660093C729 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D84927111F79E1660093C729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D84927131F79E1660093C729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D8F3849B1F7B279E00E81727 /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,14 +54,22 @@
 		D84927061F79E1660093C729 /* ChatApp-Swift-And-Firebase */ = {
 			isa = PBXGroup;
 			children = (
+				D8F3849A1F7B275400E81727 /* Controller */,
 				D84927071F79E1660093C729 /* AppDelegate.swift */,
-				D84927091F79E1660093C729 /* ViewController.swift */,
-				D849270B1F79E1660093C729 /* Main.storyboard */,
 				D849270E1F79E1660093C729 /* Assets.xcassets */,
 				D84927101F79E1660093C729 /* LaunchScreen.storyboard */,
 				D84927131F79E1660093C729 /* Info.plist */,
 			);
 			path = "ChatApp-Swift-And-Firebase";
+			sourceTree = "<group>";
+		};
+		D8F3849A1F7B275400E81727 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D8F3849B1F7B279E00E81727 /* LoginController.swift */,
+				D84927091F79E1660093C729 /* ViewController.swift */,
+			);
+			name = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -96,7 +104,7 @@
 				TargetAttributes = {
 					D84927031F79E1660093C729 = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = VBK4T9U642;
+						DevelopmentTeam = 8XLX89R83Z;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -126,7 +134,6 @@
 			files = (
 				D84927121F79E1660093C729 /* LaunchScreen.storyboard in Resources */,
 				D849270F1F79E1660093C729 /* Assets.xcassets in Resources */,
-				D849270D1F79E1660093C729 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D849270A1F79E1660093C729 /* ViewController.swift in Sources */,
+				D8F3849C1F7B279F00E81727 /* LoginController.swift in Sources */,
 				D84927081F79E1660093C729 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -145,14 +153,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D849270B1F79E1660093C729 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D849270C1F79E1660093C729 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D84927101F79E1660093C729 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -259,7 +259,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = VBK4T9U642;
+				DEVELOPMENT_TEAM = 8XLX89R83Z;
 				INFOPLIST_FILE = "ChatApp-Swift-And-Firebase/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.devsurya.com.ChatApp-Swift-And-Firebase";
@@ -272,7 +272,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = VBK4T9U642;
+				DEVELOPMENT_TEAM = 8XLX89R83Z;
 				INFOPLIST_FILE = "ChatApp-Swift-And-Firebase/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.devsurya.com.ChatApp-Swift-And-Firebase";
@@ -300,6 +300,7 @@
 				D84927181F79E1660093C729 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
