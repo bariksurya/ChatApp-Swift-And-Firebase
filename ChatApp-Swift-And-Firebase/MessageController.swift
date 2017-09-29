@@ -11,6 +11,8 @@ import Firebase
 
 class MessageController: UITableViewController {
 
+    var messages = [Message]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -18,6 +20,7 @@ class MessageController: UITableViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(title: "Sign out", style: .plain, target: self, action: #selector(handelLogOut))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "edit-message"), style: .plain, target: self, action: #selector(handelNewMessage))
         checkUserIsLoggedIn()
+        observeMessages()
     }
     
     func checkUserIsLoggedIn(){
@@ -112,8 +115,43 @@ class MessageController: UITableViewController {
     func handelNewMessage() {
         let newMessageController = NewMessageController()
         let navController = UINavigationController.init(rootViewController: newMessageController)
+        newMessageController.messageController = self
         present(navController, animated: true, completion: nil)
     }
     
+    func showChatControllerForUser(user: User) {
+        let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
+        chatLogController.user = user
+        navigationController?.pushViewController(chatLogController, animated: true)
+    }
+    
+    func observeMessages() {
+        let ref = FIRDatabase.database().reference().child("messages")
+        ref.observe(.childAdded, with: { (snapshot) in
+            
+            if let dict = snapshot.value as? [String: AnyObject] {
+                let message = Message()
+                message.setValuesForKeys(dict)
+                self.messages.append(message)
+                
+                // this will crash because of background thread , so lets use dispatch_thread
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+
+            }
+        }, withCancel: nil)
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell()
+        let message = messages[indexPath.row]
+        cell.textLabel?.text = message.text
+        return cell
+    }
 }
 

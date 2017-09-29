@@ -11,6 +11,8 @@ import Firebase
 
 class NewMessageController: UITableViewController {
 
+    var messageController = MessageController()
+    
     let cellID = "CellID"
     var users = [User]()
     
@@ -29,7 +31,7 @@ class NewMessageController: UITableViewController {
         FIRDatabase.database().reference().child("users").observe(.childAdded, with: { (snapshot) in
             if let dict = snapshot.value as? [String: AnyObject]{
                 let user = User()
-                
+                user.id = snapshot.key
                 // bellow might crash when Class Property name dont match with Dictionary Key name , safer way to do . user.name = dict["name"]
                 user.setValuesForKeys(dict)
                 self.users.append(user)
@@ -59,6 +61,13 @@ class NewMessageController: UITableViewController {
             cell.profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
         }
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        dismiss(animated: true){
+            let selecteUser = self.users[indexPath.row]
+            self.messageController.showChatControllerForUser(user: selecteUser)
+        }
     }
 }
 
