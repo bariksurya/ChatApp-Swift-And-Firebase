@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC19CFCAD43A7B83B68DA576 /* Pods_ChatApp_Swift_And_Firebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 144639B8A0BE06EE17AA9CAA /* Pods_ChatApp_Swift_And_Firebase.framework */; };
+		D82130711F7E1141005151CC /* LoginController+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82130701F7E1141005151CC /* LoginController+Handler.swift */; };
 		D832C3171F7D37550025B422 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D832C3161F7D36E90025B422 /* GoogleService-Info.plist */; };
 		D83BE8261F7D5A26002F7002 /* NewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83BE8251F7D5A25002F7002 /* NewMessageController.swift */; };
 		D83BE8291F7D653B002F7002 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83BE8281F7D653B002F7002 /* User.swift */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		144639B8A0BE06EE17AA9CAA /* Pods_ChatApp_Swift_And_Firebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ChatApp_Swift_And_Firebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D82130701F7E1141005151CC /* LoginController+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoginController+Handler.swift"; sourceTree = "<group>"; };
 		D832C3161F7D36E90025B422 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D83BE8251F7D5A25002F7002 /* NewMessageController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewMessageController.swift; sourceTree = "<group>"; };
 		D83BE8281F7D653B002F7002 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				D8F3849B1F7B279E00E81727 /* LoginController.swift */,
 				D84927091F79E1660093C729 /* MessageController.swift */,
 				D83BE8251F7D5A25002F7002 /* NewMessageController.swift */,
+				D82130701F7E1141005151CC /* LoginController+Handler.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -239,6 +242,7 @@
 			files = (
 				D83BE8261F7D5A26002F7002 /* NewMessageController.swift in Sources */,
 				D849270A1F79E1660093C729 /* MessageController.swift in Sources */,
+				D82130711F7E1141005151CC /* LoginController+Handler.swift in Sources */,
 				D8F3849C1F7B279F00E81727 /* LoginController.swift in Sources */,
 				D83BE8291F7D653B002F7002 /* User.swift in Sources */,
 				D84927081F79E1660093C729 /* AppDelegate.swift in Sources */,

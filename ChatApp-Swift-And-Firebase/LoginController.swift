@@ -76,11 +76,13 @@ class LoginController: UIViewController {
         return tf
     }()
     
-    let profileImageView: UIImageView = {
+    lazy var profileImageView: UIImageView = {
         let imgView = UIImageView()
         imgView.image = UIImage.init(named: "user")
         imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.contentMode = .scaleAspectFit
+        imgView.addGestureRecognizer(UITapGestureRecognizer.init(target: self, action: #selector(handelSelectProfileImageView)))
+        imgView.isUserInteractionEnabled = true
         return imgView
     }()
     
@@ -182,58 +184,6 @@ class LoginController: UIViewController {
         logInRegisterSegControl.heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
     
-    func handelRegister() {
-        guard let name = nameTF.text,let email = emailIdTF.text, let password = passwordTF.text else{
-            return
-        }
-        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
-            if error != nil {
-                print(error ?? "Not Trackable Error")
-                return
-            }
-            
-            guard let uid = user?.uid else {
-                return
-            }
-        
-//         Firebasedatabse reference
-        let ref = FIRDatabase.database().reference(fromURL: "https://surya-chatbox.firebaseio.com/")
-            let userRef = ref.child("users").child(uid) // this helps to separate user based on uid
-            let values = ["name":name, "email":email, "password":password]
-            userRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
-                
-                if err != nil {
-                    print(err ?? "Not Trackable Error")
-                    return
-                }
-             self.dismiss(animated: true, completion: nil)
-            })
-        })
-    }
-    
-    func handelLogIn() {
-        guard let email = emailIdTF.text, let password = passwordTF.text else {
-            return
-        }
-        
-        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
-            if error != nil {
-                return
-            }
-            // sucessfully logged in
-            self.dismiss(animated: true, completion: nil)
-        })
-    }
-    
-    func handelLogInRegister() {
-        if  logInRegisterSegControl.selectedSegmentIndex == 0{
-            handelLogIn()
-        }else {
-            handelRegister()
-        }
-    }
-
- 
     func segControlValueChanged(){
         let segControlTitle = logInRegisterSegControl.titleForSegment(at: logInRegisterSegControl.selectedSegmentIndex)
         logInRegisterButton.setTitle(segControlTitle, for: .normal)
