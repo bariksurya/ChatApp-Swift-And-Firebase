@@ -25,23 +25,76 @@ class MessageController: UITableViewController {
         if FIRAuth.auth()?.currentUser?.uid == nil {
             perform(#selector(handelLogOut), with: self, afterDelay: 0)
         }else {
-            let uid = FIRAuth.auth()?.currentUser?.uid
-            FIRDatabase.database().reference().child("users").child(uid!).observe(.value, with: { (snapshot) in
-                /*
-                     print(snapshot)
-                     Snap (8LSZQPE5O0NqT0IcpDBdkVYBrNu1) {
-                     email = "X@X.com";
-                     name = X;
-                     password = xxxxxx;
-                     }
-                 */
-                
-                if let userInfoDict = snapshot.value as? [String : AnyObject] {
-                    self.navigationItem.title = userInfoDict["name"] as? String
-                }
-           
-            }, withCancel: nil)
+            fetchUserAndSetNavBarTitle()
         }
+    }
+    
+    func fetchUserAndSetNavBarTitle() {
+        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+            return
+        }
+        FIRDatabase.database().reference().child("users").child(uid).observe(.value, with: { (snapshot) in
+            /*
+             print(snapshot)
+             Snap (8LSZQPE5O0NqT0IcpDBdkVYBrNu1) {
+             email = "X@X.com";
+             name = X;
+             password = xxxxxx;
+             }
+             */
+            
+            if let userInfoDict = snapshot.value as? [String : AnyObject] {
+                let user = User()
+                user.setValuesForKeys(userInfoDict)
+                self.setUpNavBarWithUser(user)
+            }
+            
+        }, withCancel: nil)
+    }
+    
+    func setUpNavBarWithUser(_ user:User){
+        self.navigationController?.title = user.name
+        
+        let titleView = UIView()
+        titleView.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        titleView.addSubview(containerView)
+        
+        let profileImageView = UIImageView()
+        profileImageView.translatesAutoresizingMaskIntoConstraints = false
+        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.layer.cornerRadius = 20
+        profileImageView.layer.masksToBounds = true
+        
+        if let profileImageUrl = user.profileImageUrl {
+            profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
+        }
+        
+        containerView.addSubview(profileImageView)
+        
+        profileImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+        profileImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        profileImageView.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        profileImageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        let nameLabel = UILabel()
+        nameLabel.text = user.name
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        containerView.addSubview(nameLabel)
+
+        nameLabel.leftAnchor.constraint(equalTo: profileImageView.rightAnchor, constant: 8).isActive = true
+        nameLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+        nameLabel.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
+//        nameLabel.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        nameLabel.heightAnchor.constraint(equalTo:profileImageView.heightAnchor).isActive = true
+
+        containerView.centerXAnchor.constraint(equalTo: titleView.centerXAnchor).isActive = true
+        containerView.centerYAnchor.constraint(equalTo: titleView.centerYAnchor).isActive = true
+
+        self.navigationItem.titleView = titleView
     }
     
     func handelLogOut() {
@@ -52,6 +105,7 @@ class MessageController: UITableViewController {
         }
         
         let logInController = LoginController()
+        logInController.messagesController = self
         present(logInController, animated: true, completion: nil)
     }
     

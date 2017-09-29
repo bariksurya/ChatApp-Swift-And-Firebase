@@ -27,8 +27,10 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
             
             let imageName = "my_profile_image_\(uid).png"
             // upload image
-            let storageRef = FIRStorage.storage().reference().child(imageName)
-            if let uploadData = UIImagePNGRepresentation(self.profileImageView.image!) {
+            let storageRef = FIRStorage.storage().reference().child("Profile_images").child(imageName)
+            //            if let uploadData = UIImagePNGRepresentation(self.profileImageView.image!)
+
+            if let profileImage = self.profileImageView.image ,let uploadData = UIImageJPEGRepresentation(profileImage, 0.1) {
                 storageRef.put(uploadData, metadata: nil, completion: { (metadata, err) in
                     
                     if err != nil {
@@ -57,6 +59,8 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
                 print(err ?? "Not Trackable Error")
                 return
             }
+            self.messagesController?.fetchUserAndSetNavBarTitle()
+//            self.messagesController?.navigationController?.title = values["name"] as? String
             self.dismiss(animated: true, completion: nil)
         })
     }
@@ -71,6 +75,7 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
                 return
             }
             // sucessfully logged in
+            self.messagesController?.fetchUserAndSetNavBarTitle()
             self.dismiss(animated: true, completion: nil)
         })
     }

@@ -17,6 +17,8 @@ extension UIColor {
 
 class LoginController: UIViewController {
 
+    var messagesController: MessageController?
+    
     let inputContainerView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.white
