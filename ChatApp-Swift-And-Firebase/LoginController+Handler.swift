@@ -51,7 +51,8 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
     
     private func registerUserInDatabaseWithUid(uid: String, values: [String:AnyObject]) {
         //  Firebasedatabse reference
-        let ref = FIRDatabase.database().reference(fromURL: "https://surya-chatbox.firebaseio.com/")
+//        let ref = FIRDatabase.database().reference(fromURL: "https://surya-chatbox.firebaseio.com/")
+        let ref = FIRDatabase.database().reference()
         let userRef = ref.child("users").child(uid) // this helps to separate user based on uid
         userRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
             

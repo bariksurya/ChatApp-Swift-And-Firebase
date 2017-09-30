@@ -12,6 +12,8 @@ import Firebase
 class MessageController: UITableViewController {
 
     var messages = [Message]()
+    let CellID = "CellID"
+    var MessagesDict = [String: Message]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,6 +23,8 @@ class MessageController: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "edit-message"), style: .plain, target: self, action: #selector(handelNewMessage))
         checkUserIsLoggedIn()
         observeMessages()
+        
+        tableView.register(UserCell.self, forCellReuseIdentifier: CellID)
     }
     
     func checkUserIsLoggedIn(){
@@ -42,9 +46,9 @@ class MessageController: UITableViewController {
              Snap (8LSZQPE5O0NqT0IcpDBdkVYBrNu1) {
              email = "X@X.com";
              name = X;
-             password = xxxxxx;
              }
              */
+            print(snapshot)
             
             if let userInfoDict = snapshot.value as? [String : AnyObject] {
                 let user = User()
@@ -132,7 +136,17 @@ class MessageController: UITableViewController {
             if let dict = snapshot.value as? [String: AnyObject] {
                 let message = Message()
                 message.setValuesForKeys(dict)
-                self.messages.append(message)
+//                self.messages.append(message)
+                
+                if let toId = message.toId {
+                    self.MessagesDict[toId] = message
+                    self.messages = Array(self.MessagesDict.values)
+                    
+                    
+                   self.messages =  self.messages.sorted(by: { (message1, message2) -> Bool in
+                        return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
+                    })
+                }
                 
                 // this will crash because of background thread , so lets use dispatch_thread
                 DispatchQueue.main.async {
@@ -148,10 +162,13 @@ class MessageController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: CellID, for: indexPath) as? UserCell
         let message = messages[indexPath.row]
-        cell.textLabel?.text = message.text
-        return cell
+        cell?.message = message
+        return cell!
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 72
     }
 }
-

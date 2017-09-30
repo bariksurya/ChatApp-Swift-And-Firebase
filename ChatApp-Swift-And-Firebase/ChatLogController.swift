@@ -82,7 +82,7 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate {
         let childRef = ref.childByAutoId()
         let toId = user!.id!
         let fromId = FIRAuth.auth()!.currentUser!.uid
-        let timeStamp = NSNumber(value: Date().timeIntervalSinceNow)
+        let timeStamp = NSNumber.init(value: Date().timeIntervalSince1970)
         let values = ["text":inputTextField.text!, "toId":toId, "fromId":fromId, "timeStamp":timeStamp] as [String : Any]
         childRef.updateChildValues(values)
     }

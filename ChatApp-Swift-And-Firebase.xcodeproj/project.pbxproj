@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC19CFCAD43A7B83B68DA576 /* Pods_ChatApp_Swift_And_Firebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 144639B8A0BE06EE17AA9CAA /* Pods_ChatApp_Swift_And_Firebase.framework */; };
+		D81A86F21F7FF15900ADD28D /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81A86F11F7FF15900ADD28D /* UserCell.swift */; };
 		D82130711F7E1141005151CC /* LoginController+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82130701F7E1141005151CC /* LoginController+Handler.swift */; };
 		D82130741F7E3BF7005151CC /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82130731F7E3BF7005151CC /* Extension.swift */; };
 		D82DFC001F7EB52B00042F34 /* ChatLogController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82DFBFF1F7EB52B00042F34 /* ChatLogController.swift */; };
@@ -24,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		144639B8A0BE06EE17AA9CAA /* Pods_ChatApp_Swift_And_Firebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ChatApp_Swift_And_Firebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D81A86F11F7FF15900ADD28D /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
 		D82130701F7E1141005151CC /* LoginController+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoginController+Handler.swift"; sourceTree = "<group>"; };
 		D82130731F7E3BF7005151CC /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		D82DFBFF1F7EB52B00042F34 /* ChatLogController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLogController.swift; sourceTree = "<group>"; };
@@ -60,6 +62,14 @@
 				144639B8A0BE06EE17AA9CAA /* Pods_ChatApp_Swift_And_Firebase.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D81A86F01F7FF12900ADD28D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D81A86F11F7FF15900ADD28D /* UserCell.swift */,
+			);
+			name = View;
 			sourceTree = "<group>";
 		};
 		D82130721F7E3BDE005151CC /* Helper */ = {
@@ -100,6 +110,7 @@
 		D84927061F79E1660093C729 /* ChatApp-Swift-And-Firebase */ = {
 			isa = PBXGroup;
 			children = (
+				D81A86F01F7FF12900ADD28D /* View */,
 				D82130721F7E3BDE005151CC /* Helper */,
 				D83BE8271F7D6510002F7002 /* Model */,
 				D8F3849A1F7B275400E81727 /* Controller */,
@@ -265,6 +276,7 @@
 				D82130711F7E1141005151CC /* LoginController+Handler.swift in Sources */,
 				D8F3849C1F7B279F00E81727 /* LoginController.swift in Sources */,
 				D83BE8291F7D653B002F7002 /* User.swift in Sources */,
+				D81A86F21F7FF15900ADD28D /* UserCell.swift in Sources */,
 				D84927081F79E1660093C729 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
