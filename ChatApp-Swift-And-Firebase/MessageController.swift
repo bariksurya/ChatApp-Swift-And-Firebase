@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 
 class MessageController: UITableViewController {
+    var timer: Timer!
 
     var messages = [Message]()
     let CellID = "CellID"
@@ -151,23 +152,26 @@ class MessageController: UITableViewController {
                     message.setValuesForKeys(dict)
                     //                self.messages.append(message)
                     
-                    if let toId = message.toId {
-                        self.MessagesDict[toId] = message
+                    let chatPartnerID = message.chatPartnerId()
+                    
+//                    if let toId = message.toId {
+                        self.MessagesDict[chatPartnerID] = message
                         self.messages = Array(self.MessagesDict.values)
                         
                         
                         self.messages =  self.messages.sorted(by: { (message1, message2) -> Bool in
                             return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
                         })
-                    }
-                    self.timer.invalidate()
-                    self.timer = Timer.init(timeInterval:0.01, target: self, selector: #selector(self.handelReloadTable), userInfo: nil, repeats: false)
+//                    }
+                    
+                    self.handelReloadTable()
+//                    self.timer.invalidate()
+//                    self.timer = Timer.init(timeInterval:0.01, target: self, selector: #selector(self.handelReloadTable), userInfo: nil, repeats: false)
                 }
             }, withCancel: nil)
         }, withCancel: nil)
     }
     
-    var timer: Timer
     
     func handelReloadTable() {
         // this will crash because of background thread , so lets use dispatch_thread
@@ -209,4 +213,6 @@ class MessageController: UITableViewController {
     }, withCancel: nil)
     
     }
+    
+   
 }

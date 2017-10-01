@@ -21,6 +21,12 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         }
     }
     
+    lazy var containerview: UIView = {
+        let cView = UIView()
+        cView.backgroundColor = UIColor.white
+        return cView
+    }()
+    
     lazy var inputTextField: UITextField = {
         let inputTf = UITextField()
         inputTf.placeholder = "Enter Message ....."
@@ -33,11 +39,23 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView?.backgroundColor = UIColor.white
-        collectionView?.contentInset = UIEdgeInsetsMake(8, 0, 58, 0)
-        collectionView?.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, 50, 0)
+        collectionView?.contentInset = UIEdgeInsetsMake(8, 0, 8, 0)
+//        collectionView?.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, 50, 0)
         collectionView?.alwaysBounceVertical = true
         collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
-        setUpInputComponents()
+        collectionView?.keyboardDismissMode = .interactive
+        self.setUpInputComponents()
+        setUpKeyboardObservers()
+    }
+    
+    override var inputAccessoryView: UIView? {
+        get {
+            return containerview
+        }
+    }
+    
+    override var canBecomeFirstResponder: Bool {
+        return true
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,16 +63,19 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         // Dispose of any resources that can be recreated.
     }
     
+    var containerViewBottomAncher: NSLayoutConstraint?
+    
     func setUpInputComponents() {
-        let containerview = UIView()
-        containerview.translatesAutoresizingMaskIntoConstraints = false
-        containerview.backgroundColor = UIColor.white
-        view.addSubview(containerview)
         
-        containerview.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        containerview.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        containerview.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        containerview.heightAnchor.constraint(equalToConstant: 50).isActive = true
+//        containerview.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+//        containerview.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+//        containerViewBottomAncher =
+//            containerview.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+//        containerViewBottomAncher?.isActive = true
+//        containerview.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        
+        containerview.frame = CGRect.init(x: 0, y: 0, width: view.frame.size.width, height: 50)
+//        view.addSubview(containerview)
         
         let separatorView = UIView()
         separatorView.backgroundColor = UIColor.lightGray
@@ -194,4 +215,33 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         }, withCancel: nil)
     }
 
+    func setUpKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handelKeyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handelKeyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    func handelKeyboardWillShow(notification: NSNotification) {
+        let keyboardFrame = (notification.userInfo![UIKeyboardFrameEndUserInfoKey]! as AnyObject).cgRectValue
+        let keyboardDuration = (notification.userInfo![UIKeyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue
+        containerViewBottomAncher?.constant = -keyboardFrame!.height
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    func handelKeyboardWillHide(notification: NSNotification){
+//        let keyboardFrame = (notification.userInfo![UIKeyboardFrameEndUserInfoKey]! as AnyObject).cgRectValue
+        containerViewBottomAncher?.constant = 0
+        let keyboardDuration = (notification.userInfo![UIKeyboardAnimationDurationUserInfoKey]! as AnyObject).doubleValue
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
 }
+
