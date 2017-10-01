@@ -13,17 +13,7 @@ class UserCell: UITableViewCell {
     
     var message: Message? {
         didSet {
-            if let toId = message?.toId {
-                let ref = FIRDatabase.database().reference().child("users").child(toId)
-                ref.observeSingleEvent(of: .value, with: { (snapshot) in
-                    if let dict = snapshot.value as? [String: AnyObject] {
-                        self.textLabel?.text = dict["name"] as? String
-                        if let profileImageUrl = dict["profileImageUrl"] as? String {
-                            self.profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
-                        }
-                    }
-                }, withCancel: nil)
-            }
+            setUpNameAndProfileImage()
             detailTextLabel?.text = message?.text
             
             if let seconds = message?.timeStamp?.doubleValue {
@@ -33,6 +23,30 @@ class UserCell: UITableViewCell {
                 timeLabel.text = dateFormatter.string(from: timesnapDate as Date)
             }
             
+        }
+    }
+    
+    private func setUpNameAndProfileImage() {
+        let chatPartnerId: String?
+        
+        if message?.fromId == FIRAuth.auth()?.currentUser?.uid {
+            chatPartnerId = message?.toId
+        } else {
+            chatPartnerId = message?.fromId
+        }
+        
+        
+        
+        if let id = chatPartnerId {
+            let ref = FIRDatabase.database().reference().child("users").child(id)
+            ref.observeSingleEvent(of: .value, with: { (snapshot) in
+                if let dict = snapshot.value as? [String: AnyObject] {
+                    self.textLabel?.text = dict["name"] as? String
+                    if let profileImageUrl = dict["profileImageUrl"] as? String {
+                        self.profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
+                    }
+                }
+            }, withCancel: nil)
         }
     }
 

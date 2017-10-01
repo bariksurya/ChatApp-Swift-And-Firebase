@@ -22,7 +22,7 @@ class MessageController: UITableViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(title: "Sign out", style: .plain, target: self, action: #selector(handelLogOut))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "edit-message"), style: .plain, target: self, action: #selector(handelNewMessage))
         checkUserIsLoggedIn()
-        observeMessages()
+//        observeMessages()
         
         tableView.register(UserCell.self, forCellReuseIdentifier: CellID)
     }
@@ -60,6 +60,11 @@ class MessageController: UITableViewController {
     }
     
     func setUpNavBarWithUser(_ user:User){
+        messages.removeAll()
+        MessagesDict.removeAll()
+        tableView.reloadData() 
+        observeUserMessages()
+
         self.navigationController?.title = user.name
         
         let titleView = UIView()
@@ -127,6 +132,42 @@ class MessageController: UITableViewController {
         let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
         chatLogController.user = user
         navigationController?.pushViewController(chatLogController, animated: true)
+    }
+    
+    func observeUserMessages() {
+        
+        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+            return
+        }
+        
+        let ref = FIRDatabase.database().reference().child("user-messages").child(uid)
+        ref.observe(.childAdded, with: { (snapshot) in
+            
+            let messageId = snapshot.key
+            let messagesReference = FIRDatabase.database().reference().child("messages").child(messageId)
+            messagesReference.observeSingleEvent(of:.value, with: { (snapshot) in
+                if let dict = snapshot.value as? [String: AnyObject] {
+                    let message = Message()
+                    message.setValuesForKeys(dict)
+                    //                self.messages.append(message)
+                    
+                    if let toId = message.toId {
+                        self.MessagesDict[toId] = message
+                        self.messages = Array(self.MessagesDict.values)
+                        
+                        
+                        self.messages =  self.messages.sorted(by: { (message1, message2) -> Bool in
+                            return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
+                        })
+                    }
+                    
+                    // this will crash because of background thread , so lets use dispatch_thread
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            }, withCancel: nil)
+        }, withCancel: nil)
     }
     
     func observeMessages() {
