@@ -160,42 +160,20 @@ class MessageController: UITableViewController {
                             return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
                         })
                     }
-                    
-                    // this will crash because of background thread , so lets use dispatch_thread
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
+                    self.timer.invalidate()
+                    self.timer = Timer.init(timeInterval:0.01, target: self, selector: #selector(self.handelReloadTable), userInfo: nil, repeats: false)
                 }
             }, withCancel: nil)
         }, withCancel: nil)
     }
     
-    func observeMessages() {
-        let ref = FIRDatabase.database().reference().child("messages")
-        ref.observe(.childAdded, with: { (snapshot) in
-            
-            if let dict = snapshot.value as? [String: AnyObject] {
-                let message = Message()
-                message.setValuesForKeys(dict)
-//                self.messages.append(message)
-                
-                if let toId = message.toId {
-                    self.MessagesDict[toId] = message
-                    self.messages = Array(self.MessagesDict.values)
-                    
-                    
-                   self.messages =  self.messages.sorted(by: { (message1, message2) -> Bool in
-                        return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
-                    })
-                }
-                
-                // this will crash because of background thread , so lets use dispatch_thread
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-
-            }
-        }, withCancel: nil)
+    var timer: Timer
+    
+    func handelReloadTable() {
+        // this will crash because of background thread , so lets use dispatch_thread
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

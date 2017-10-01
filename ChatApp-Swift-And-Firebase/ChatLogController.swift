@@ -26,12 +26,15 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         inputTf.placeholder = "Enter Message ....."
         inputTf.translatesAutoresizingMaskIntoConstraints = false
         inputTf.delegate = self
+        inputTf.backgroundColor = UIColor.clear
         return inputTf
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView?.backgroundColor = UIColor.white
+        collectionView?.contentInset = UIEdgeInsetsMake(8, 0, 58, 0)
+        collectionView?.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, 50, 0)
         collectionView?.alwaysBounceVertical = true
         collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
         setUpInputComponents()
@@ -53,6 +56,15 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         containerview.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         containerview.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
+        let separatorView = UIView()
+        separatorView.backgroundColor = UIColor.lightGray
+        separatorView.translatesAutoresizingMaskIntoConstraints = false
+        containerview.addSubview(separatorView)
+        
+        separatorView.leftAnchor.constraint(equalTo: containerview.leftAnchor).isActive = true
+        separatorView.rightAnchor.constraint(equalTo: containerview.rightAnchor).isActive = true
+        separatorView.topAnchor.constraint(equalTo: containerview.topAnchor).isActive = true
+        separatorView.heightAnchor.constraint(equalToConstant: 1).isActive = true
         
         let sendButton = UIButton(type: .system)
         sendButton.setTitle("Send", for: .normal)
@@ -66,21 +78,11 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         
         containerview.addSubview(inputTextField)
 
-        inputTextField.leftAnchor.constraint(equalTo: containerview.leftAnchor).isActive = true
+        inputTextField.leftAnchor.constraint(equalTo: containerview.leftAnchor, constant: 20).isActive = true
         inputTextField.centerYAnchor.constraint(equalTo: containerview.centerYAnchor).isActive = true
 //        inputTf.widthAnchor.constraint(equalToConstant: containerview.frame.size.width - sendButton.frame.size.width).isActive = true
         inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor, constant: 10).isActive = true
         inputTextField.heightAnchor.constraint(lessThanOrEqualTo: containerview.heightAnchor).isActive = true
-
-        let separatorView = UIView()
-        separatorView.backgroundColor = UIColor.gray
-        separatorView.translatesAutoresizingMaskIntoConstraints = false
-        containerview.addSubview(separatorView)
-        
-        separatorView.leftAnchor.constraint(equalTo: containerview.leftAnchor).isActive = true
-        separatorView.rightAnchor.constraint(equalTo: containerview.rightAnchor).isActive = true
-        separatorView.topAnchor.constraint(equalTo: containerview.topAnchor).isActive = true
-        separatorView.heightAnchor.constraint(equalToConstant: 1).isActive = false
     }
     
     func handelSend() {
@@ -97,6 +99,8 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
                 print(error!)
                 return
             }
+            
+            self.inputTextField.text = nil
             
             let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(fromId)
             let messageId = childRef.key
@@ -121,14 +125,49 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
         let messages = self.messages[indexPath.item]
         cell.textView.text = messages.text
+        
+        setUpCell(cell: cell, messages: messages)
+        cell.bubbleWidthAnchor?.constant = estimatedHeightBasedOnText(text: messages.text!).width + 32
+        
         return cell
+    }
+    
+    private func setUpCell(cell: ChatMessageCell, messages: Message){
+        
+        if let profileImageUrl = self.user?.profileImageUrl {
+            cell.profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
+        }
+        
+        if messages.fromId == FIRAuth.auth()?.currentUser?.uid {
+            cell.bubbleView.backgroundColor = UIColor.init(r: 0, g: 137, b: 249)
+            cell.textView.textColor = UIColor.white
+            cell.profileImageView.isHidden = true
+            cell.bubbleViewRightAnchor?.isActive = true
+            cell.bubbleViewLeftAnchor?.isActive = false
+        }else {
+            cell.bubbleView.backgroundColor = UIColor.init(r: 240, g: 240, b: 240)
+            cell.textView.textColor = UIColor.black
+            cell.profileImageView.isHidden = false
+            cell.bubbleViewRightAnchor?.isActive = false
+            cell.bubbleViewLeftAnchor?.isActive = true
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize.init(width: view.frame.width, height: 80)
+        var height: CGFloat = 80
+        if let text = messages[indexPath.row].text {
+            height = estimatedHeightBasedOnText(text: text).height + 20
+        }
         
+        return CGSize.init(width: view.frame.width, height: height)
+    }
+    
+    private func estimatedHeightBasedOnText(text: String) -> CGRect{
+       let size = CGSize.init(width: 200, height: 1000)
+       let option = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
+       return NSString.init(string: text).boundingRect(with: size, options: option, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 16)], context: nil)
     }
     
     func observeMessage() {
