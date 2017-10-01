@@ -7,9 +7,9 @@ target 'ChatApp-Swift-And-Firebase' do
 
   # Pods for ChatApp-Swift-And-Firebase
 
-  pod 'Firebase/Database'
+  pod 'Firebase'
   pod 'Firebase/Auth'
-  pod 'Firebase/Storage'
-
+  pod 'FirebaseDatabase'
+  pod 'FirebaseStorage'
 
 end

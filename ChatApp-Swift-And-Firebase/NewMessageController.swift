@@ -8,13 +8,16 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
+import FirebaseDatabase
+import FirebaseStorage
 
 class NewMessageController: UITableViewController {
 
     var messageController = MessageController()
     
     let cellID = "CellID"
-    var users = [User]()
+    var users = [Person]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,9 +31,9 @@ class NewMessageController: UITableViewController {
     }
     
     func fetchUser() {
-        FIRDatabase.database().reference().child("users").observe(.childAdded, with: { (snapshot) in
+        Database.database().reference().child("users").observe(.childAdded, with: { (snapshot) in
             if let dict = snapshot.value as? [String: AnyObject]{
-                let user = User()
+                let user = Person()
                 user.id = snapshot.key
                 // bellow might crash when Class Property name dont match with Dictionary Key name , safer way to do . user.name = dict["name"]
                 user.setValuesForKeys(dict)

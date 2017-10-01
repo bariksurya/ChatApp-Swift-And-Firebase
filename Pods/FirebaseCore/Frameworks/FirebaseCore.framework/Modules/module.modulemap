@@ -2,7 +2,4 @@ framework module FirebaseCore {
   umbrella header "FirebaseCore.h"
   export *
   module * { export *}
-  link "z"
-  link framework "Foundation"
-  link framework "UIKit"
-}
+  link "z"}

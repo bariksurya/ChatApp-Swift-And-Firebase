@@ -8,6 +8,10 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
+import FirebaseDatabase
+import FirebaseStorage
+
 
 extension LoginController: UIImagePickerControllerDelegate,UINavigationControllerDelegate {
     
@@ -15,7 +19,7 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
         guard let name = nameTF.text,let email = emailIdTF.text, let password = passwordTF.text else{
             return
         }
-        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user: FIRUser?, error) in
+        Auth.auth().createUser(withEmail: email, password: password, completion: { (user: User?, error) in
             if error != nil {
                 print(error ?? "Not Trackable Error")
                 return
@@ -27,11 +31,11 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
             
             let imageName = "my_profile_image_\(uid).png"
             // upload image
-            let storageRef = FIRStorage.storage().reference().child("Profile_images").child(imageName)
+            let storageRef = Storage.storage().reference().child("Profile_images").child(imageName)
             //            if let uploadData = UIImagePNGRepresentation(self.profileImageView.image!)
 
             if let profileImage = self.profileImageView.image ,let uploadData = UIImageJPEGRepresentation(profileImage, 0.1) {
-                storageRef.put(uploadData, metadata: nil, completion: { (metadata, err) in
+                storageRef.putData(uploadData, metadata: nil, completion: { (metadata, err) in
                     
                     if err != nil {
                         print(err ?? "not traceable error")
@@ -52,7 +56,7 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
     private func registerUserInDatabaseWithUid(uid: String, values: [String:AnyObject]) {
         //  Firebasedatabse reference
 //        let ref = FIRDatabase.database().reference(fromURL: "https://surya-chatbox.firebaseio.com/")
-        let ref = FIRDatabase.database().reference()
+        let ref = Database.database().reference()
         let userRef = ref.child("users").child(uid) // this helps to separate user based on uid
         userRef.updateChildValues(values, withCompletionBlock: { (err, ref) in
             
@@ -71,7 +75,7 @@ extension LoginController: UIImagePickerControllerDelegate,UINavigationControlle
             return
         }
         
-        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
+        Auth.auth().signIn(withEmail: email, password: password, completion: { (user, error) in
             if error != nil {
                 return
             }

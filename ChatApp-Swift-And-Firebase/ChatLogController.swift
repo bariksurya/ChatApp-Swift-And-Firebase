@@ -8,13 +8,16 @@
 
 import UIKit
 import Firebase
+import FirebaseDatabase
+import FirebaseAuth
+import FirebaseStorage
 
 class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollectionViewDelegateFlowLayout{
     
     let cellId = "CellID"
     var messages = [Message]()
     
-    var user : User? {
+    var user : Person? {
         didSet {
             navigationItem.title = user?.name
             observeMessage()
@@ -117,10 +120,10 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     
     
     func handelSend() {
-        let ref = FIRDatabase.database().reference().child("messages")
+        let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
         let toId = user!.id!
-        let fromId = FIRAuth.auth()!.currentUser!.uid
+        let fromId = Auth.auth().currentUser!.uid
         let timeStamp = NSNumber.init(value: Date().timeIntervalSince1970)
         let values = ["text":inputTextField.text!, "toId":toId, "fromId":fromId, "timeStamp":timeStamp] as [String : Any]
         childRef.updateChildValues(values)
@@ -133,11 +136,11 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
             
             self.inputTextField.text = nil
             
-            let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(fromId).child(toId)
+            let userMessageRef = Database.database().reference().child("user-messages").child(fromId).child(toId)
             let messageId = childRef.key
             userMessageRef.updateChildValues([messageId: 1])
             
-            let recipentUserMessageRef = FIRDatabase.database().reference().child("user-messages").child(toId).child(fromId)
+            let recipentUserMessageRef = Database.database().reference().child("user-messages").child(toId).child(fromId)
             recipentUserMessageRef.updateChildValues([messageId: 1])
         }
     }
@@ -169,7 +172,7 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
             cell.profileImageView.loadImagesUsingCacheWithUrlString(urlString: profileImageUrl)
         }
         
-        if messages.fromId == FIRAuth.auth()?.currentUser?.uid {
+        if messages.fromId == Auth.auth().currentUser?.uid {
             cell.bubbleView.backgroundColor = UIColor.init(r: 0, g: 137, b: 249)
             cell.textView.textColor = UIColor.white
             cell.profileImageView.isHidden = true
@@ -202,13 +205,13 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     }
     
     func observeMessage() {
-        guard let uid = FIRAuth.auth()?.currentUser?.uid, let toId = user?.id else {
+        guard let uid = Auth.auth().currentUser?.uid, let toId = user?.id else {
             return
         }
-        let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(uid).child(toId)
+        let userMessageRef = Database.database().reference().child("user-messages").child(uid).child(toId)
         userMessageRef.observe(.childAdded, with: { (snapshot) in
             let messageId = snapshot.key
-            let messagesRef = FIRDatabase.database().reference().child("messages").child(messageId)
+            let messagesRef = Database.database().reference().child("messages").child(messageId)
             messagesRef.observeSingleEvent(of: .value, with: { (snapshot) in
                 guard let dict = snapshot.value as? [String: AnyObject] else {
                     return

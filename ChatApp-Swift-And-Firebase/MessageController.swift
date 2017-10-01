@@ -7,7 +7,10 @@
 //
 
 import UIKit
-import Firebase
+//import FirebaseCore
+import FirebaseAuth
+import FirebaseDatabase
+import FirebaseStorage
 
 class MessageController: UITableViewController {
     var timer: Timer!
@@ -30,7 +33,7 @@ class MessageController: UITableViewController {
     
     func checkUserIsLoggedIn(){
         // user not logged in
-        if FIRAuth.auth()?.currentUser?.uid == nil {
+        if Auth.auth().currentUser?.uid == nil {
             perform(#selector(handelLogOut), with: self, afterDelay: 0)
         }else {
             fetchUserAndSetNavBarTitle()
@@ -38,10 +41,10 @@ class MessageController: UITableViewController {
     }
     
     func fetchUserAndSetNavBarTitle() {
-        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+        guard let uid = Auth.auth().currentUser?.uid else {
             return
         }
-        FIRDatabase.database().reference().child("users").child(uid).observe(.value, with: { (snapshot) in
+        Database.database().reference().child("users").child(uid).observe(.value, with: { (snapshot) in
             /*
              print(snapshot)
              Snap (8LSZQPE5O0NqT0IcpDBdkVYBrNu1) {
@@ -52,7 +55,7 @@ class MessageController: UITableViewController {
             print(snapshot)
             
             if let userInfoDict = snapshot.value as? [String : AnyObject] {
-                let user = User()
+                let user = Person()
                 user.setValuesForKeys(userInfoDict)
                 self.setUpNavBarWithUser(user)
             }
@@ -60,7 +63,7 @@ class MessageController: UITableViewController {
         }, withCancel: nil)
     }
     
-    func setUpNavBarWithUser(_ user:User){
+    func setUpNavBarWithUser(_ user:Person){
         messages.removeAll()
         MessagesDict.removeAll()
         tableView.reloadData() 
@@ -112,7 +115,7 @@ class MessageController: UITableViewController {
     
     func handelLogOut() {
         do {
-            try FIRAuth.auth()?.signOut()
+            try Auth.auth().signOut()
         } catch let logoutError {
             print(logoutError)
         }
@@ -129,7 +132,7 @@ class MessageController: UITableViewController {
         present(navController, animated: true, completion: nil)
     }
     
-    func showChatControllerForUser(user: User) {
+    func showChatControllerForUser(user: Person) {
         let chatLogController = ChatLogController(collectionViewLayout: UICollectionViewFlowLayout())
         chatLogController.user = user
         navigationController?.pushViewController(chatLogController, animated: true)
@@ -137,18 +140,18 @@ class MessageController: UITableViewController {
     
     func observeUserMessages() {
         
-        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+        guard let uid = Auth.auth().currentUser?.uid else {
             return
         }
         
-        let ref = FIRDatabase.database().reference().child("user-messages").child(uid)
+        let ref = Database.database().reference().child("user-messages").child(uid)
         ref.observe(.childAdded, with: { (snapshot) in
             
             let userId = snapshot.key
-            FIRDatabase.database().reference().child("user-messages").child(uid).child(userId).observe(.childAdded, with: { (mSnapshot) in
+            Database.database().reference().child("user-messages").child(uid).child(userId).observe(.childAdded, with: { (mSnapshot) in
                 //
                 let messageId = mSnapshot.key
-                let messagesReference = FIRDatabase.database().reference().child("messages").child(messageId)
+                let messagesReference = Database.database().reference().child("messages").child(messageId)
                 messagesReference.observeSingleEvent(of:.value, with: { (snapshot) in
                     if let dict = snapshot.value as? [String: AnyObject] {
                         let message = Message()
@@ -205,13 +208,13 @@ class MessageController: UITableViewController {
         let message = messages[indexPath.row]
         let chartPartnerId = message.chatPartnerId()
     
-        let ref = FIRDatabase.database().reference().child("users").child(chartPartnerId)
+        let ref = Database.database().reference().child("users").child(chartPartnerId)
         ref.observeSingleEvent(of: .value, with: { (snapshot) in
         guard let dictionary = snapshot.value as? [String: AnyObject] else {
             return
         }
         
-        let user = User()
+        let user = Person()
         user.id = chartPartnerId
         user.setValuesForKeys(dictionary)  
         self.showChatControllerForUser(user: user)

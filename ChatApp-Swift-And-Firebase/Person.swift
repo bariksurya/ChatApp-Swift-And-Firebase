@@ -8,7 +8,7 @@
 
 import UIKit
 
-class User: NSObject {
+class Person: NSObject {
     var id: String?
     var name: String?
     var email: String?
