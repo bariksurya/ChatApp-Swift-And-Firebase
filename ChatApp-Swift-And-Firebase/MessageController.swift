@@ -212,4 +212,23 @@ class MessageController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 72
     }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let message = messages[indexPath.row]
+        let chartPartnerId = message.chatPartnerId()
+    
+        let ref = FIRDatabase.database().reference().child("users").child(chartPartnerId)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+        guard let dictionary = snapshot.value as? [String: AnyObject] else {
+            return
+        }
+        
+        let user = User()
+        user.id = chartPartnerId
+        user.setValuesForKeys(dictionary)  
+        self.showChatControllerForUser(user: user)
+        
+    }, withCancel: nil)
+    
+    }
 }

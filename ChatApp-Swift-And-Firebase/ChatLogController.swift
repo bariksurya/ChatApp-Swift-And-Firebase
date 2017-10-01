@@ -9,11 +9,15 @@
 import UIKit
 import Firebase
 
-class ChatLogController: UICollectionViewController,UITextFieldDelegate {
-
+class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollectionViewDelegateFlowLayout{
+    
+    let cellId = "CellID"
+    var messages = [Message]()
+    
     var user : User? {
         didSet {
             navigationItem.title = user?.name
+            observeMessage()
         }
     }
     
@@ -28,6 +32,8 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView?.backgroundColor = UIColor.white
+        collectionView?.alwaysBounceVertical = true
+        collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
         setUpInputComponents()
     }
 
@@ -98,8 +104,6 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate {
             
             let recipentUserMessageRef = FIRDatabase.database().reference().child("user-messages").child(toId)
             recipentUserMessageRef.updateChildValues([messageId: 1])
-            
-            
         }
     }
     
@@ -109,5 +113,46 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate {
         return true
     }
     
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
+        let messages = self.messages[indexPath.item]
+        cell.textView.text = messages.text
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize.init(width: view.frame.width, height: 80)
+        
+    }
+    
+    func observeMessage() {
+        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+            return
+        }
+        let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(uid)
+        userMessageRef.observe(.childAdded, with: { (snapshot) in
+            let messageId = snapshot.key
+            let messagesRef = FIRDatabase.database().reference().child("messages").child(messageId)
+            messagesRef.observeSingleEvent(of: .value, with: { (snapshot) in
+                guard let dict = snapshot.value as? [String: AnyObject] else {
+                    return
+                }
+                let message = Message()
+                message.setValuesForKeys(dict)
+                if message.chatPartnerId() == self.user?.id {
+                    self.messages.append(message)
+                    DispatchQueue.main.async {
+                        self.collectionView?.reloadData()
+                    }
+                }
+            }, withCancel: nil)
+        }, withCancel: nil)
+    }
 
 }
