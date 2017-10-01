@@ -90,6 +90,7 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         let sendButton = UIButton(type: .system)
         sendButton.setTitle("Send", for: .normal)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
+        sendButton.addTarget(self, action: #selector(checkTFisEmpty), for: .touchUpInside)
         containerview.addSubview(sendButton)
         
         sendButton.rightAnchor.constraint(equalTo: containerview.rightAnchor, constant: -20).isActive = true
@@ -105,6 +106,15 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor, constant: 10).isActive = true
         inputTextField.heightAnchor.constraint(lessThanOrEqualTo: containerview.heightAnchor).isActive = true
     }
+    
+    func checkTFisEmpty() {
+        if inputTextField.text == ""{
+            return
+        }else {
+           handelSend()
+        }
+    }
+    
     
     func handelSend() {
         let ref = FIRDatabase.database().reference().child("messages")
@@ -123,17 +133,17 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
             
             self.inputTextField.text = nil
             
-            let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(fromId)
+            let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(fromId).child(toId)
             let messageId = childRef.key
             userMessageRef.updateChildValues([messageId: 1])
             
-            let recipentUserMessageRef = FIRDatabase.database().reference().child("user-messages").child(toId)
+            let recipentUserMessageRef = FIRDatabase.database().reference().child("user-messages").child(toId).child(fromId)
             recipentUserMessageRef.updateChildValues([messageId: 1])
         }
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        handelSend()
+        checkTFisEmpty()
         textField.resignFirstResponder()
         return true
     }
@@ -192,10 +202,10 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     }
     
     func observeMessage() {
-        guard let uid = FIRAuth.auth()?.currentUser?.uid else {
+        guard let uid = FIRAuth.auth()?.currentUser?.uid, let toId = user?.id else {
             return
         }
-        let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(uid)
+        let userMessageRef = FIRDatabase.database().reference().child("user-messages").child(uid).child(toId)
         userMessageRef.observe(.childAdded, with: { (snapshot) in
             let messageId = snapshot.key
             let messagesRef = FIRDatabase.database().reference().child("messages").child(messageId)
@@ -205,12 +215,10 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
                 }
                 let message = Message()
                 message.setValuesForKeys(dict)
-                if message.chatPartnerId() == self.user?.id {
                     self.messages.append(message)
                     DispatchQueue.main.async {
                         self.collectionView?.reloadData()
                     }
-                }
             }, withCancel: nil)
         }, withCancel: nil)
     }

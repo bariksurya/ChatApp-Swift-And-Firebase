@@ -144,17 +144,20 @@ class MessageController: UITableViewController {
         let ref = FIRDatabase.database().reference().child("user-messages").child(uid)
         ref.observe(.childAdded, with: { (snapshot) in
             
-            let messageId = snapshot.key
-            let messagesReference = FIRDatabase.database().reference().child("messages").child(messageId)
-            messagesReference.observeSingleEvent(of:.value, with: { (snapshot) in
-                if let dict = snapshot.value as? [String: AnyObject] {
-                    let message = Message()
-                    message.setValuesForKeys(dict)
-                    //                self.messages.append(message)
-                    
-                    let chatPartnerID = message.chatPartnerId()
-                    
-//                    if let toId = message.toId {
+            let userId = snapshot.key
+            FIRDatabase.database().reference().child("user-messages").child(uid).child(userId).observe(.childAdded, with: { (mSnapshot) in
+                //
+                let messageId = mSnapshot.key
+                let messagesReference = FIRDatabase.database().reference().child("messages").child(messageId)
+                messagesReference.observeSingleEvent(of:.value, with: { (snapshot) in
+                    if let dict = snapshot.value as? [String: AnyObject] {
+                        let message = Message()
+                        message.setValuesForKeys(dict)
+                        //                self.messages.append(message)
+                        
+                        let chatPartnerID = message.chatPartnerId()
+                        
+                        //                    if let toId = message.toId {
                         self.MessagesDict[chatPartnerID] = message
                         self.messages = Array(self.MessagesDict.values)
                         
@@ -162,16 +165,19 @@ class MessageController: UITableViewController {
                         self.messages =  self.messages.sorted(by: { (message1, message2) -> Bool in
                             return Date.init(timeIntervalSince1970: message1.timeStamp!.doubleValue) > Date.init(timeIntervalSince1970: message2.timeStamp!.doubleValue)
                         })
-//                    }
-                    
-                    self.handelReloadTable()
-//                    self.timer.invalidate()
-//                    self.timer = Timer.init(timeInterval:0.01, target: self, selector: #selector(self.handelReloadTable), userInfo: nil, repeats: false)
-                }
+                        //                    }
+                        
+                        self.handelReloadTable()
+                    }
+                }, withCancel: nil)
             }, withCancel: nil)
         }, withCancel: nil)
     }
-    
+//
+//    private func attemptReloadOfTable() {
+//            self.timer?.invalidate()
+//            self.timer = Timer.init(timeInterval:0.01, target: self, selector: #selector(self.handelReloadTable), userInfo: nil, repeats: false)
+//    }
     
     func handelReloadTable() {
         // this will crash because of background thread , so lets use dispatch_thread
