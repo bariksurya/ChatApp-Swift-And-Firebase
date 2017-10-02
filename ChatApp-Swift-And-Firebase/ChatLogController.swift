@@ -125,29 +125,7 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     
     
     func handelSend() {
-        let ref = Database.database().reference().child("messages")
-        let childRef = ref.childByAutoId()
-        let toId = user!.id!
-        let fromId = Auth.auth().currentUser!.uid
-        let timeStamp = NSNumber.init(value: Date().timeIntervalSince1970)
-        let values = ["text":inputTextField.text!, "toId":toId, "fromId":fromId, "timeStamp":timeStamp] as [String : Any]
-        childRef.updateChildValues(values)
-        
-        childRef.updateChildValues(values) { (error, ref) in
-            if error != nil {
-                print(error!)
-                return
-            }
-            
-            self.inputTextField.text = nil
-            
-            let userMessageRef = Database.database().reference().child("user-messages").child(fromId).child(toId)
-            let messageId = childRef.key
-            userMessageRef.updateChildValues([messageId: 1])
-            
-            let recipentUserMessageRef = Database.database().reference().child("user-messages").child(toId).child(fromId)
-            recipentUserMessageRef.updateChildValues([messageId: 1])
-        }
+        sendMessageWithProperty(["text":inputTextField.text! as AnyObject])
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -169,6 +147,8 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         
         if let text = messages.text {
             cell.bubbleWidthAnchor?.constant = estimatedHeightBasedOnText(text: text).width + 32
+        } else if messages.imageUrl != nil {
+            cell.bubbleWidthAnchor?.constant = 200
         }
         
         return cell
@@ -207,8 +187,11 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         var height: CGFloat = 80
-        if let text = messages[indexPath.row].text {
+        let message = messages[indexPath.row]
+        if let text = message.text {
             height = estimatedHeightBasedOnText(text: text).height + 20
+        }else if let imageWidth = message.imageWidth?.floatValue , let imageHeight = message.imageHeight?.floatValue {
+            height = CGFloat(imageHeight / imageWidth * 200)
         }
         
         return CGSize.init(width: view.frame.width, height: height)
@@ -237,12 +220,17 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
                     self.messages.append(message)
                     DispatchQueue.main.async {
                         self.collectionView?.reloadData()
+                        let indexpath = NSIndexPath.init(item: self.messages.count-1, section: 0)
+                        self.collectionView?.scrollToItem(at: indexpath as IndexPath, at: .bottom, animated: true)
                     }
             }, withCancel: nil)
         }, withCancel: nil)
     }
 
     func setUpKeyboardObservers() {
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handelKeyboardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(handelKeyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handelKeyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -251,6 +239,13 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(true)
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    func handelKeyboardDidShow() {
+        if messages.count > 0 {
+            let indexpath = NSIndexPath.init(item: self.messages.count-1, section: 0)
+            self.collectionView?.scrollToItem(at: indexpath as IndexPath, at: .top, animated: true)
+        }
     }
     
     func handelKeyboardWillShow(notification: NSNotification) {
@@ -307,19 +302,26 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
                 }
                 
                 if let imageUrl = metadata?.downloadURL()?.absoluteString {
-                    self.sendMessageWithImageUrl(imageUrl)
+                    self.sendMessageWithImageUrl(imageUrl , image)
                 }
             })
         }
     }
     
-    private func sendMessageWithImageUrl(_ imageUrl: String){
+    private func sendMessageWithImageUrl(_ imageUrl: String , _ image: UIImage){
+        sendMessageWithProperty(["imageUrl":imageUrl,"imageWidth":image.size.width , "imageHeight":image.size.height] as [String: AnyObject])
+    }
+    
+    private func sendMessageWithProperty(_ property: [String: AnyObject]){
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
         let toId = user!.id!
         let fromId = Auth.auth().currentUser!.uid
         let timeStamp = NSNumber.init(value: Date().timeIntervalSince1970)
-        let values = ["imageUrl":imageUrl, "toId":toId, "fromId":fromId, "timeStamp":timeStamp] as [String : Any]
+        var values: [String : AnyObject] = ["toId":toId as AnyObject, "fromId":fromId as AnyObject, "timeStamp":timeStamp]
+        
+        values = values.merged(with: property)
+ 
         childRef.updateChildValues(values)
         
         childRef.updateChildValues(values) { (error, ref) in
@@ -335,6 +337,20 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
             let recipentUserMessageRef = Database.database().reference().child("user-messages").child(toId).child(fromId)
             recipentUserMessageRef.updateChildValues([messageId: 1])
         }
+
+    }
+}
+
+extension Dictionary {
+    
+    mutating func merge(with dictionary: Dictionary) {
+        dictionary.forEach { updateValue($1, forKey: $0) }
+    }
+    
+    func merged(with dictionary: Dictionary) -> Dictionary {
+        var dict = self
+        dict.merge(with: dictionary)
+        return dict
     }
 }
 
