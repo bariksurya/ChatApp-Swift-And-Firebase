@@ -31,6 +31,13 @@ class MessageController: UITableViewController {
         tableView.register(UserCell.self, forCellReuseIdentifier: CellID)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+//        if self.navigationController?.title == nil {
+//            handelLogOut()
+//        }
+    }
+    
     func checkUserIsLoggedIn(){
         // user not logged in
         if Auth.auth().currentUser?.uid == nil {
