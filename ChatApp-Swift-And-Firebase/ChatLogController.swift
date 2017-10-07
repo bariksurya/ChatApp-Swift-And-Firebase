@@ -140,6 +140,9 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
+        
+        cell.chatLogController = self
+        
         let messages = self.messages[indexPath.item]
         cell.textView.text = messages.text
         
@@ -147,8 +150,10 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
         
         if let text = messages.text {
             cell.bubbleWidthAnchor?.constant = estimatedHeightBasedOnText(text: text).width + 32
+            cell.textView.isHidden = false
         } else if messages.imageUrl != nil {
             cell.bubbleWidthAnchor?.constant = 200
+            cell.textView.isHidden = true
         }
         
         return cell
@@ -338,6 +343,64 @@ class ChatLogController: UICollectionViewController,UITextFieldDelegate,UICollec
             recipentUserMessageRef.updateChildValues([messageId: 1])
         }
 
+    }
+    
+    var startingFrame: CGRect?
+    var backBackgroundView: UIView?
+    var startingImageView: UIImageView?
+    func performZoomInForStartingImageVIew(startingImageView: UIImageView) {
+        self.startingImageView = startingImageView
+        self.startingImageView?.isHidden = true
+        startingFrame = startingImageView.superview?.convert(startingImageView.frame, to: nil)
+        let zoomingImageView = UIImageView.init(frame: startingFrame!)
+        zoomingImageView.image = startingImageView.image
+        zoomingImageView.backgroundColor = UIColor.red
+        zoomingImageView.addGestureRecognizer(UITapGestureRecognizer.init(target: self, action: #selector(handelZoomOut)))
+        zoomingImageView.isUserInteractionEnabled = true
+        
+        if let keyWindow =  UIApplication.shared.keyWindow {
+  
+            backBackgroundView = UIView.init(frame: keyWindow.frame)
+            if let backBackgroundView = backBackgroundView {
+                backBackgroundView.backgroundColor = UIColor.black
+                backBackgroundView.alpha = 0
+                keyWindow.addSubview(backBackgroundView)
+            }
+            keyWindow.addSubview(zoomingImageView)
+            
+            UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseOut, animations: {
+                self.backBackgroundView!.alpha = 1
+                self.inputAccessoryView?.alpha = 0
+                // calculate heright h2/w2 = h1/w1
+                let height = self.startingFrame!.height / self.startingFrame!.width * keyWindow.frame.width
+                zoomingImageView.frame = CGRect.init(x: 0, y: 0, width: keyWindow.frame.width, height: height)
+                zoomingImageView.center = keyWindow.center
+            }, completion: nil)
+        }
+    }
+    
+    func handelZoomOut(tapGesture: UITapGestureRecognizer){
+        if let zoomOutImageView = tapGesture.view {
+            zoomOutImageView.layer.cornerRadius = 16
+            zoomOutImageView.clipsToBounds = true
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                zoomOutImageView.frame = self.startingFrame!
+                self.backBackgroundView?.alpha = 0
+                self.inputAccessoryView?.alpha = 1
+            }, completion: { (completed) in
+                zoomOutImageView.removeFromSuperview()
+                self.startingImageView?.isHidden = false
+            })
+            
+            /*
+            UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseOut, animations: {
+                zoomOutImageView.frame = self.startingFrame!
+                self.backBackgroundView?.alpha = 0
+            }, completion: { (completed: Bool) in
+                zoomOutImageView.removeFromSuperview()
+            }) */
+        }
     }
 }
 
