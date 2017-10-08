@@ -15,7 +15,7 @@ extension UIColor {
     }
 }
 
-class LoginController: UIViewController {
+class LoginController: UIViewController,UITextFieldDelegate {
 
     var messagesController: MessageController?
     
@@ -110,6 +110,10 @@ class LoginController: UIViewController {
         setUpLogInRegisterView()
         setUpProfileImageView()
         setUpLogInRegisterSegControl()
+        
+        nameTF.delegate = self
+        passwordTF.delegate = self
+        emailIdTF.delegate = self
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -207,5 +211,14 @@ class LoginController: UIViewController {
         passwordTextFieldHeightAnchor?.isActive = false
         passwordTextFieldHeightAnchor = passwordTF.heightAnchor.constraint(equalTo: inputContainerView.heightAnchor, multiplier: logInRegisterSegControl.selectedSegmentIndex == 0 ? 1/2 : 1/3)
         passwordTextFieldHeightAnchor?.isActive = true
+        
+        let hideProfileImageView: Bool!
+        hideProfileImageView = logInRegisterSegControl.selectedSegmentIndex == 0 ? true : false
+        profileImageView.isHidden = hideProfileImageView
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
