@@ -29,13 +29,11 @@ class MessageController: UITableViewController {
 //        observeMessages()
         
         tableView.register(UserCell.self, forCellReuseIdentifier: CellID)
+        tableView.allowsMultipleSelectionDuringEditing = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-//        if self.navigationController?.title == nil {
-//            handelLogOut()
-//        }
     }
     
     func checkUserIsLoggedIn(){
@@ -182,6 +180,11 @@ class MessageController: UITableViewController {
                 }, withCancel: nil)
             }, withCancel: nil)
         }, withCancel: nil)
+        
+        ref.observe(.childRemoved, with: { (snapshot) in
+            self.MessagesDict.removeValue(forKey: snapshot.key)
+            self.handelReloadTable()
+        }, withCancel: nil)
     }
 //
 //    private func attemptReloadOfTable() {
@@ -225,10 +228,30 @@ class MessageController: UITableViewController {
         user.id = chartPartnerId
         user.setValuesForKeys(dictionary)  
         self.showChatControllerForUser(user: user)
-        
-    }, withCancel: nil)
-    
+        }, withCancel: nil)
     }
     
-   
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        
+        let messages = self.messages[indexPath.row]
+        
+        Database.database().reference().child("user-messages").child(uid).child(messages.chatPartnerId()).removeValue { (error, ref) in
+            if error != nil {
+                print(error!)
+                return
+            }
+//            self.MessagesDict.removeValue(forKey: messages.chatPartnerId())
+//            self.handelReloadTable()
+            self.messages.remove(at: indexPath.row)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
 }
